@@ -57,7 +57,7 @@ export default function OrderInfo() {
   if (!checkout) return null;
 
   return (
-    <div className="container py-4">
+    <div className="max-w-6xl mx-auto px-4 py-4">
       <style>{`
         :root{--brand:#f08b2d;--dark:#3d231d}
         .step-pill{background:#f3e8d0;color:#3d231d;border-radius:28px;padding:12px 22px;font-weight:700}
@@ -73,9 +73,9 @@ export default function OrderInfo() {
         <div className="step-pill" style={{opacity:.5}}>3. Payment</div>
       </div>
 
-      <div className="row g-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Kolom kiri: informasi penerima */}
-        <div className="col-lg-4">
+        <div className="lg:col-span-4">
           <div className="box">
             <div className="fw-semibold mb-2">Informasi Penerima</div>
             <label className="small text-muted">Nama Penerima</label>
@@ -93,7 +93,7 @@ export default function OrderInfo() {
         </div>
 
         {/* Kolom kanan atas: info toko */}
-        <div className="col-lg-8">
+        <div className="lg:col-span-8">
           <div className="box mb-3">
             <div className="fw-semibold mb-2">Pesanan dapat diambil di:</div>
             <div className="small">{store.addr}</div>
@@ -144,7 +144,7 @@ export default function OrderInfo() {
       </div>
 
       {/* Ringkasan singkat bisa ditaruh di sidebar juga; di mockup total ada di Payment */}
-      <div className="text-end mt-3 small text-muted">Total: <b>{fmtRp(total)}</b></div>
+      <div className="text-end mt-3 text-sm text-muted">Total: <b>{fmtRp(total)}</b></div>
     </div>
   );
 }

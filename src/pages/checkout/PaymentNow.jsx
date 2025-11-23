@@ -23,7 +23,7 @@ export default function PaymentNow() {
   const items = checkout.items || [];
 
   return (
-    <div className="container py-4">
+    <div className="max-w-6xl mx-auto px-4 py-4">
       <style>{`
         :root{--brand:#f08b2d;--dark:#3d231d}
         .step-pill{background:#f3e8d0;color:#3d231d;border-radius:28px;padding:12px 22px;font-weight:700}
@@ -45,9 +45,9 @@ export default function PaymentNow() {
         <div className="banner mb-3">Pesanan berhasil dibuat</div>
       )}
 
-      <div className="row g-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Invoice kiri */}
-        <div className="col-lg-4">
+        <div className="lg:col-span-4">
           <div className="panel">
             <div className="panel-h">Invoice Pesanan</div>
             <div className="panel-b">
@@ -77,7 +77,7 @@ export default function PaymentNow() {
         </div>
 
         {/* Metode pembayaran kanan */}
-        <div className="col-lg-8">
+        <div className="lg:col-span-8">
           <div className="panel">
             <div className="panel-h">Pilih Metode Pembayaran</div>
             <div className="panel-b">

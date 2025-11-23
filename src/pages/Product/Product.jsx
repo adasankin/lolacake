@@ -1,118 +1,125 @@
-/*
-Product.jsx
-React component for the "Product" page (Bootstrap + custom CSS)
-
-Usage:
-1. Place this file in src/components/Product.jsx
-2. Ensure Bootstrap CSS is imported in src/main.jsx: `import 'bootstrap/dist/css/bootstrap.min.css'`
-3. Add images to /public or /src/assets and update paths below.
-4. Import and use in App.jsx: `import Product from './components/Product'` then <Product />.
-
-This component recreates the layout from your provided mock: hero with background and search, section title, two big feature cards (Item Satuan & Paketan), and a simple responsive footer.
-*/
-
-import React, { useState } from 'react';
+import React from "react";
 import { Link } from "react-router-dom";
+import SearchBar from "../../components/ui/SearchBar.jsx";
+import { motion } from "framer-motion";
+
+const products = [
+  {
+    img: "src/assets/Product/satuan.png",
+    alt: "item",
+    title: "Cocok untuk camilan harian dan hadiah kecil.",
+    // desc: "Jelajahi pilihan kue dan paket Lola Cake yang dibuat dari bahan segar dan citarasa rumahan.",
+    link: "/product/satuan",
+    linkText: "Pilih Item Satuan",
+  },
+  {
+    img: "src/assets/Product/paketan.png",
+    alt: "paket",
+    title: "Ideal untuk acara spesial, hampers, dan pesanan besar.",
+    // desc: "Pilih paket yang sesuai kebutuhan acara atau buat hampers personal untuk orang tersayang.",
+    link: "/product/paketan",
+    linkText: "Pilih Paketan",
+  },
+];
 
 export default function Product() {
-  const [query, setQuery] = useState('');
-  
   return (
     <div className="product-page">
-      <style>{`
-        :root{
-          --brand-orange: #f08b2d;
-          --brand-dark: #3d231d;
-          --muted: #fff8f1;
-          --card-border: rgba(61,35,29,0.2);
-        }
-        .hero-product{
-          background-image: url('/assets/hero-baking.jpg');
-          background-size: cover;
-          background-position: center;
-          padding: 90px 0 60px;
-          color: white;
-          position: relative;
-        }
-        .hero-overlay{position:absolute;inset:0;background: linear-gradient(180deg, rgba(61,35,29,0.55), rgba(61,35,29,0.55));}
-        .hero-content{position:relative;z-index:2}
-        .search-box{max-width:760px;margin:20px auto 0;box-shadow:0 8px 30px rgba(0,0,0,0.15);}
-        .section-title{padding:64px 0 24px;text-align:center;color:var(--brand-dark)}
+      {/* Hero */}
+      <section className="relative h-150 flex items-center justify-center">
+        <img src="/src/assets/Product/banner.png" alt="Banner" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(61,35,29,0.55)] to-[rgba(61,35,29,0.55)]" />
+        <div className="relative z-10 max-w-6xl mx-auto px-4 text-center text-white">
+          <motion.h1
+            className="mx-auto max-w-3xl font-extrabold text-2xl md:text-4xl leading-tight text-white"
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          >
+            Temukan aneka kue dan hidangan spesial dari Lola Cake — dibuat dengan bahan berkualitas, rasa rumahan, dan cinta dari dapur kami!
+          </motion.h1>
 
-        /* big cards */
-        .category-card{background:#fff;border-radius:14px;padding:32px;border:4px solid var(--card-border);box-shadow:0 8px 20px rgba(0,0,0,0.06)}
-        .category-card img{max-width:240px;height:140px;object-fit:cover}
-        .category-cta{background:var(--brand-orange);border-radius:8px;color:white;padding:10px 18px;border:none}
+          <motion.div
+            className="mt-6"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            <div className="shadow-2xl rounded-full max-w-[760px] mx-auto">
+              <SearchBar
+                placeholder="Temukan produk favoritmu di sini..."
+                description=""
+                from="product-hero"
+              />
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
-        /* product grid */
-        .product-grid .card{border-radius:14px;border:2px solid var(--card-border)}
+      {/* Title & Desc */}
+      <section className="py-16">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <motion.h2
+            className="text-2xl md:text-3xl font-extrabold text-[#3d231d]"
+            initial={{ y: 30, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true, amount: 0.3 }}
+          >
+            Temukan Beragam Pilihan Lezat dari Lola Cake!
+          </motion.h2>
+          <motion.p
+            className="mt-2 text-sm text-slate-600 max-w-2xl mx-auto"
+            initial={{ y: 20, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true, amount: 0.3 }}
+          >
+            Pilih produk satuan untuk pembelian per item, atau produk paketan untuk acara dan hampers spesialmu.
+          </motion.p>
+        </div>
+      </section>
 
-        /* footer small */
-        .product-footer{background:var(--brand-orange);color:var(--brand-dark);padding:40px 0;margin-top:48px}
-
-        @media(max-width:767px){
-          .hero-product{padding:48px 0}
-          .category-card img{max-width:140px}
-        }
-      `}</style>
-
-      {/* HERO */}
-      <section className="hero-product">
-        <div className="hero-overlay" />
-        <div className="container hero-content">
-
-          <div className="text-center">
-            <h1 style={{fontWeight:700, fontSize: '1.9rem', maxWidth: 900, margin: '0 auto'}}>Temukan aneka kue dan hidangan spesial dari Lola Cake — dibuat dengan bahan berkualitas, rasa rumahan, dan cinta dari dapur kami!</h1>
-
-            <div className="search-box bg-white rounded-pill p-2 mt-4">
-              <div className="input-group">
-                <span className="input-group-text bg-white border-0" style={{borderRadius: '999px 0 0 999px'}}>
-                  <i className="bi bi-search" />
-                </span>
-                <input
-                  className="form-control border-0"
-                  placeholder="Temukan kue favoritmu di sini..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+      {/* Kategori */}
+      <section className="relative mb-20">
+        <img src="src/assets/Product/left.svg" alt="Left icon"
+          className="hidden md:block absolute left-0 top-1/3 w-[300px] h-[500px] -z-10"
+        />
+        <img src="src/assets/Product/right.svg" alt="Right icon"
+          className="hidden md:block absolute right-0 top-1/3 w-[300px] h-[500px] -z-10"
+        />
+        
+        <div className="relative max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+            {products.map((card, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.5, delay: i * 0.2 }}
+                className="rounded-xl p-8 bg-white border-4 border-[rgba(61,35,29,0.12)] shadow-[0_8px_20px_rgba(0,0,0,0.06)] flex flex-col items-center text-center"
+              >
+                <motion.img
+                  src={card.img}
+                  alt={card.alt}
+                  initial={{ scale: 0.9 }}
+                  whileInView={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  className="w-full h-48 object-contain rounded-md mb-4 bg-white"
                 />
-                <button className="btn bg-white border-0" style={{borderRadius:'0 999px 999px 0'}}> </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TITLE + DESCRIPTION */}
-      <section className="section-title">
-        <div className="container">
-          <h2 style={{fontWeight:800}}>Temukan Beragam Pilihan Lezat dari Lola Cake!</h2>
-          <p className="text-muted">Pilih produk satuan untuk pembelian per item, atau produk paketan untuk acara dan hampers spesialmu.</p>
-        </div>
-      </section>
-
-      {/* BIG CATEGORY CARDS */}
-      <section className="container mb-5">
-        <div className="row gy-4 align-items-center">
-          <div className="col-md-6">
-            <div className="category-card d-flex align-items-center gap-4">
-              <img src="/assets/card-item-satuan.jpg" alt="item" />
-              <div>
-                <h5 style={{color:'var(--brand-dark)'}}>Cocok untuk camilan harian dan hadiah kecil.</h5>
-                <p className="text-muted">Jelajahi pilihan kue dan paket Lola Cake yang dibuat dari bahan segar dan citarasa rumahan.</p>
-                <Link to="/product/satuan" className="category-cta">Pilih Item Satuan</Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="col-md-6">
-            <div className="category-card d-flex align-items-center gap-4">
-              <img src="/assets/card-paket.jpg" alt="paket" />
-              <div>
-                <h5 style={{color:'var(--brand-dark)'}}>Ideal untuk acara spesial, hampers, dan pesanan besar.</h5>
-                <p className="text-muted">Pilih paket yang sesuai kebutuhan acara atau buat hampers personal untuk orang tersayang.</p>
-                <Link to="/product/paketan" className="category-cta">Pilih Paketan</Link>
-              </div>
-            </div>
+                <h5 className="font-semibold text-lg text-[#3d231d]">
+                  {card.title}
+                </h5>
+                {/* <p className="mt-2 text-sm text-slate-600">{card.desc}</p> */}
+                <Link
+                  to={card.link}
+                    className="min-w-[160px] mt-4 px-4 py-2 rounded-md text-white bg-[#f08b2d] hover:brightness-105 text-center"              >
+                  {card.linkText}
+                </Link>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>

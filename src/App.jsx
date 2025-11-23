@@ -18,6 +18,7 @@ import PaymentNow from "./pages/checkout/PaymentNow.jsx";
 import PaymentCOD from "./pages/checkout/PaymentCOD";
 import PaymentWaiting from "./pages/checkout/PaymentWaiting";
 import AccountPage from "./pages/account/AccountPage";
+import Search from "./pages/search/Search";
 // import Cart from "./pages/Cart";
 import { CartProvider } from "./context/CartContext";
 import RequireAuth from "./components/RequireAuth";
@@ -31,6 +32,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login/>} />
           <Route path="/" element={<Home />} />
+          <Route path="/search" element={<Search />} />
           <Route path="/product" element={<Product />} />
           <Route path="/product/satuan" element={<ProductList />} />
           <Route path="/product/paketan" element={<ProductPaket />} />
@@ -39,7 +41,7 @@ export default function App() {
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/register" element={<SignUp />} />
           <Route path="/auth/forgot" element={<ForgotPassword />} />
           <Route path="/auth/verify" element={<VerifyAccount />} />
           <Route path="/auth/set-password" element={<SetNewPassword />} />

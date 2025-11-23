@@ -350,6 +350,7 @@ export default function ProductDetail({ type = "satuan" }) {
         qty,
       });
     localStorage.setItem(key, JSON.stringify(cart));
+    try { window.dispatchEvent(new Event("cart-changed")); } catch {}
   };
 
   const handleAddToCart = () => {
@@ -392,7 +393,7 @@ export default function ProductDetail({ type = "satuan" }) {
   const reviews = product.reviews || [];
 
   return (
-    <div className="container py-4">
+    <div className="max-w-6xl mx-auto px-4 py-4">
       <style>{`
         :root{--brand:#f08b2d; --dark:#3d231d;}
         .pd-breadcrumb{font-size:13px;color:#777}
@@ -405,12 +406,13 @@ export default function ProductDetail({ type = "satuan" }) {
         .btn-brand{background:var(--brand);color:#fff}
       `}</style>
 
-      {/* Breadcrumb */}
-      <div className="pd-breadcrumb mb-2">Home &gt; Product &gt;</div>
+      <div className="pd-breadcrumb mb-2">
+        <a href="/">Home</a> &gt; <a href="/product">Product</a> &gt; <a href={`/product/${type}`}>{type === "satuan" ? "Item Satuan" : "Paketan"}</a>
+      </div>
 
-      <div className="row g-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Kiri: gambar + ratings */}
-        <div className="col-lg-4">
+        <div className="lg:col-span-4">
           <img
             src={product.img}
             alt={productName}
@@ -452,7 +454,7 @@ export default function ProductDetail({ type = "satuan" }) {
         </div>
 
         {/* Tengah: detail */}
-        <div className="col-lg-5">
+        <div className="lg:col-span-5">
           <h3 className="pd-title mb-2">{productName}</h3>
           <div className="small text-muted mb-2">
             <span className="me-3">4.9 ★</span>
@@ -530,7 +532,7 @@ export default function ProductDetail({ type = "satuan" }) {
         </div>
 
         {/* Kanan: Atur Pesanan */}
-        <div className="col-lg-3">
+        <div className="lg:col-span-3">
           <div className="order-card">
             <div className="d-flex align-items-center gap-2 mb-2">
               <img

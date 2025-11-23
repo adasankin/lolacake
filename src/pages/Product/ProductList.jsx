@@ -1,212 +1,369 @@
-/*
-ProductList.jsx
+import React, { useMemo, useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import { slugify } from "../../lib/slugify";
+import { ShoppingCart, ChevronDown } from "lucide-react";
+import SearchBar from "../../components/ui/SearchBar.jsx";
+import { motion } from "framer-motion";
+import allIcon from "../../assets/Product/Satuan/Kategori/cake.png";
+import cakeIcon from "../../assets/Product/Satuan/Kategori/cake.png";
+import tradisionalIcon from "../../assets/Product/Satuan/Kategori/tradisional.png";
+import dessertIcon from "../../assets/Product/Satuan/Kategori/dessert.png";
+import breadIcon from "../../assets/Product/Satuan/Kategori/bread.png";
+import donutIcon from "../../assets/Product/Satuan/Kategori/donut.png";
+import cookieIcon from "../../assets/Product/Satuan/Kategori/cookie.png";
+import products from "../../data.js";
 
-Halaman "Item Satuan" untuk Lola Cake.
-Fitur:
-- Kategori (Cake, Tradisional, Dessert, Bread, Donut, Cookie)
-- Filter rentang harga (dual-range via 2 input range) dengan tombol "Terapkan Filter"
-- Sort (Harga Terendah, Harga Tertinggi, Terbaru, Terlaris)
-- Grid produk responsif dengan tombol Detail dan Add to Cart
+function readUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user")) || null;
+  } catch {
+    return null;
+  }
+}
+const isSatuan = (p) => String(p.id).startsWith("s-");
 
-Instruksi:
-- Simpan file ini di `src/components/ProductList.jsx`
-- Pastikan `react-router-dom` terpasang dan route untuk `/product/satuan` mengarah ke komponen ini
-- Pastikan Bootstrap CSS diimpor (`import 'bootstrap/dist/css/bootstrap.min.css'` di main.jsx)
-- Ganti path gambar `/assets/...` sesuai struktur proyekmu
-*/
-
-import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { slugify } from '../../lib/slugify';
-
-const CATEGORIES = [
-  { id: 'cake', label: 'Cake' },
-  { id: 'tradisional', label: 'Tradisional' },
-  { id: 'dessert', label: 'Dessert' },
-  { id: 'bread', label: 'Bread' },
-  { id: 'donut', label: 'Donut' },
-  { id: 'cookie', label: 'Cookie' },
-];
-
-const SAMPLE_PRODUCTS = [
-  { id: 'p1', title: 'Bolu Keju', category: 'cake', price: 75000, img: '/assets/bolu-keju.png', sold: 120, createdAt: '2024-10-01' },
-  { id: 'p2', title: 'Bolu Zebra', category: 'cake', price: 75000, img: '/assets/bolu-zebra.png', sold: 210, createdAt: '2024-09-10' },
-  { id: 'p3', title: 'Bolu Pandan', category: 'cake', price: 75000, img: '/assets/bolu-pandan.png', sold: 90, createdAt: '2024-11-05' },
-  { id: 'p4', title: 'Bolu Gula Merah', category: 'cake', price: 75000, img: '/assets/bolu-gula.png', sold: 60, createdAt: '2024-07-21' },
-  { id: 'p5', title: 'Bolu Gulung', category: 'cake', price: 75000, img: '/assets/bolu-gulung.png', sold: 45, createdAt: '2024-06-12' },
-  { id: 'p6', title: 'Brownies Coklat', category: 'cake', price: 75000, img: '/assets/brownies.png', sold: 300, createdAt: '2024-11-01' },
-  { id: 'p7', title: 'Bolu Pisang', category: 'cake', price: 70000, img: '/assets/bolu-pisang.png', sold: 80, createdAt: '2024-05-30' },
-  { id: 'p8', title: 'Bolu Caramel', category: 'cake', price: 75000, img: '/assets/bolu-caramel.png', sold: 40, createdAt: '2024-03-18' },
-  { id: 'p9', title: 'Bolu Cuke', category: 'cake', price: 3500, img: '/assets/bolu-cuke.png', sold: 15, createdAt: '2024-01-10' },
-  { id: 'p10', title: 'Bolu Lapis Surabaya', category: 'cake', price: 3500, img: '/assets/bolu-lapis.png', sold: 9, createdAt: '2024-02-02' },
-  // Add more items here and change categories accordingly (e.g. 'donut', 'cookie')
-];
+const ICON_MAP = {
+  cake: cakeIcon,
+  tradisional: tradisionalIcon,
+  dessert: dessertIcon,
+  bread: breadIcon,
+  donut: donutIcon,
+  cookie: cookieIcon,
+};
 
 export default function ProductList() {
-  // category selection
-  const [activeCategory, setActiveCategory] = useState('cake');
+  // TODO: fetch products dari API
 
-  // sorting and filters (these are the *applied* filters)
-  const [appliedSort, setAppliedSort] = useState('default');
-  const [appliedMin, setAppliedMin] = useState(30000);
+  // derive categories dari data.js: hanya kategori produk "satuan"
+  const categories = useMemo(() => {
+    const set = new Map();
+    products.forEach((p) => {
+      if (!isSatuan(p)) return;
+      const keyRaw = (p.category || "Uncategorized").trim();
+      const id = keyRaw.toLowerCase().replace(/\s+/g, "-");
+      if (!set.has(id)) {
+        set.set(id, {
+          id,
+          label: keyRaw,
+          icon: ICON_MAP[id],
+        });
+      }
+    });
+    return [{ id: "all", label: "All", icon: allIcon }, ...Array.from(set.values())];
+  }, []);
+
+  const categoryDescriptions = {
+    all: "Koleksi lengkap produk satuan Lola Cake — mulai dari kue panggang, jajanan tradisional, dessert manis, roti lembut, donat hangat, hingga cookie renyah. Semua dibuat segar dengan bahan pilihan terbaik untuk menemani setiap momen spesialmu.",
+    cake: "Koleksi kue panggang lembut dengan cita rasa klasik. Dari bolu yang ringan hingga brownies yang kaya rasa, semuanya dipanggang segar dengan bahan pilihan terbaik.",
+    tradisional: "Aneka jajanan tradisional khas Nusantara yang menghadirkan rasa autentik dan nostalgia. Dibuat segar dengan resep turun-temurun dan bahan pilihan terbaik.",
+    dessert: "Dessert manis yang menggugah selera, mulai dari puding lembut hingga tart cantik. Semua dibuat segar dengan bahan pilihan terbaik untuk momen spesialmu.",
+    bread: "Roti lembut dengan berbagai varian rasa, dari klasik hingga modern. Dipanggang segar setiap hari dengan bahan berkualitas untuk menemani sarapan atau camilan.",
+    donut: "Donat hangat dengan topping beragam, dari gula halus hingga cokelat premium. Semua dibuat segar dengan bahan pilihan terbaik.",
+    cookie: "Cookie renyah dengan rasa yang kaya, dari choco chip klasik hingga kreasi unik. Dipanggang segar dengan bahan pilihan terbaik untuk setiap gigitan."
+  };
+
+  // UI state
+  const [activeCategory, setActiveCategory] = useState(categories[0]?.id || "all");
+  const [appliedSort, setAppliedSort] = useState("default");
+  const [appliedMin] = useState(3000);
   const [appliedMax, setAppliedMax] = useState(500000);
-
-  // temporary UI state for slider before applying
-  const [tempMin, setTempMin] = useState(appliedMin);
   const [tempMax, setTempMax] = useState(appliedMax);
+  const [openPrice, setOpenPrice] = useState(false);
+  const [openSort, setOpenSort] = useState(false);
+  const [query, setQuery] = useState("");
+  const sortRef = useRef(null);
+  const priceRef = useRef(null);
 
-  // search box (instant)
-  const [query, setQuery] = useState('');
-
-  // compute filtered list
-  const products = SAMPLE_PRODUCTS;
-
+  // Filter & sort products (non-mutating)
   const filteredProducts = useMemo(() => {
-    const catFiltered = products.filter(p => p.category === activeCategory);
-    const qFiltered = catFiltered.filter(p => p.title.toLowerCase().includes(query.toLowerCase()));
-    const priceFiltered = qFiltered.filter(p => p.price >= appliedMin && p.price <= appliedMax);
-
-    switch (appliedSort) {
-      case 'price-asc':
-        return priceFiltered.sort((a, b) => a.price - b.price);
-      case 'price-desc':
-        return priceFiltered.sort((a, b) => b.price - a.price);
-      case 'newest':
-        return priceFiltered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      case 'top':
-        return priceFiltered.sort((a, b) => b.sold - a.sold);
-      default:
-        return priceFiltered;
+    let list = products.filter(isSatuan);
+    if (activeCategory && activeCategory !== "all") {
+      list = list.filter((p) => {
+        const id = (p.category || "").toLowerCase().replace(/\s+/g, "-");
+        return id === activeCategory;
+      });
     }
-  }, [products, activeCategory, query, appliedMin, appliedMax, appliedSort]);
+    const q = (query || "").trim().toLowerCase();
+    if (q) {
+      list = list.filter((p) => (p.nama || p.title || "").toLowerCase().includes(q));
+    }
+    list = list.filter((p) => Number(p.price) >= appliedMin && Number(p.price) <= appliedMax);
+
+    // urutkan
+    switch (appliedSort) {
+      case "price-asc":
+        list = [...list].sort((a, b) => a.price - b.price);
+        break;
+      case "price-desc":
+        list = [...list].sort((a, b) => b.price - a.price);
+        break;
+      case "newest":
+        list = [...list].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        break;
+      case "top":
+        list = [...list].sort((a, b) => (b.sold || 0) - (a.sold || 0));
+        break;
+      default:
+        list = list;
+    }
+
+    return list;
+  }, [products, activeCategory, query, appliedMax, appliedMin, appliedSort]);
+
+  const SORT_OPTIONS = [
+    { value: "default", label: "Urutkan Berdasarkan" },
+    { value: "price-asc", label: "Harga Terendah" },
+    { value: "price-desc", label: "Harga Tertinggi" },
+    { value: "newest", label: "Terbaru" },
+    { value: "top", label: "Terlaris" },
+  ];
 
   function applyFilters() {
-    setAppliedMin(Number(tempMin));
     setAppliedMax(Number(tempMax));
+    setOpenPrice(false);
   }
 
-  // ensure tempMin <= tempMax
-  function onTempMinChange(val) {
-    const v = Number(val);
-    if (v <= tempMax) setTempMin(v);
-    else setTempMin(tempMax);
-  }
-  function onTempMaxChange(val) {
-    const v = Number(val);
-    if (v >= tempMin) setTempMax(v);
-    else setTempMax(tempMin);
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (sortRef.current && !sortRef.current.contains(e.target)) {
+        setOpenSort(false);
+      }
+    }
+    if (openSort) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openSort]);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (priceRef.current && !priceRef.current.contains(e.target)) {
+        setOpenPrice(false);
+      }
+    }
+    if (openPrice) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openPrice]);
+
+
+  function addToCart(p) {
+    const u = readUser();
+    if (!u) {
+      window.location.href = "/login";
+      return;
+    }
+    const key = "lola_cart";
+    const raw = localStorage.getItem(key);
+    const cart = raw ? JSON.parse(raw) : [];
+    const idx = cart.findIndex((i) => i.id === p.id);
+    if (idx >= 0) cart[idx].qty = (cart[idx].qty || 1) + 1;
+    else cart.push({ id: p.id, name: p.nama || p.title, price: p.price, qty: 1 });
+    localStorage.setItem(key, JSON.stringify(cart));
+    try {
+      window.dispatchEvent(new Event("cart-changed"));
+    } catch {}
   }
 
   return (
-    <div className="product-list-page">
-      <style>{`
-        :root{--brand-orange:#f08b2d;--brand-dark:#3d231d}
-        .hero-small{background-image:url('/assets/hero-baking.jpg');background-position:center;background-size:cover;padding:90px 0;color:white;}
-        .category-row{display:flex;gap:18px;justify-content:center;margin-top:-14px}
-        .cat-pill{border-radius:12px;padding:12px 18px;background:#fff;border:1px solid rgba(0,0,0,0.06);text-align:center;cursor:pointer;min-width:88px}
-        .cat-pill.active{background:var(--brand-orange);color:white;box-shadow:0 10px 20px rgba(0,0,0,0.08);transform:translateY(-6px)}
-        .product-grid{padding:40px 0}
-        .product-card{border-radius:12px;border:1px solid rgba(61,35,29,0.08);padding:16px;background:white}
-        .product-image{width:160px;height:140px;object-fit:cover;border-radius:10px}
-        .controls-row{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px}
-        .slider-wrap{display:flex;gap:8px;align-items:center}
-        @media(max-width:767px){.category-row{flex-wrap:wrap}}
-      `}</style>
+    <div className="min-h-screen bg-white">
+      {/* Hero */}
+      <section className="relative h-150 flex items-center justify-center">
+        <img src="/src/assets/Product/banner.png" alt="Banner" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(61,35,29,0.55)] to-[rgba(61,35,29,0.55)]" />
+        <div className="relative z-10 max-w-6xl mx-auto px-4 text-center text-white">
+          <motion.h1
+            className="mx-auto max-w-3xl font-extrabold text-2xl md:text-4xl leading-tight text-white"
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          >
+            Temukan aneka kue dan hidangan spesial dari Lola Cake — dibuat dengan bahan berkualitas, rasa rumahan, dan cinta dari dapur kami!
+          </motion.h1>
 
-      {/* HERO */}
-      <section className="hero-small text-center">
-        <div className="container">
-          <h2 style={{fontWeight:700,fontSize:28}}>Temukan Beragam Pilihan Lezat dari Lola Cake!</h2>
-          <p style={{maxWidth:800,margin:'8px auto'}}>Koleksi kue panggang lembut dengan cita rasa klasik. Pilih kategori untuk melihat produk sesuai jenis.</p>
-
-          <div className="category-row mt-4">
-            {CATEGORIES.map(cat => (
-              <div
-                key={cat.id}
-                className={`cat-pill ${activeCategory === cat.id ? 'active' : ''}`}
-                onClick={() => setActiveCategory(cat.id)}
-              >
-                <div style={{fontSize:22}}>🍰</div>
-                <div style={{fontWeight:600,marginTop:6}}>{cat.label}</div>
-              </div>
-            ))}
-          </div>
-
+          <motion.div
+            className="mt-6"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            <div className="shadow-2xl rounded-full max-w-[760px] mx-auto">
+              <SearchBar
+                placeholder="Temukan produk favoritmu di sini..."
+                description=""
+                from="product-hero"
+              />
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Breadcrumb + Title */}
-      <div className="container mt-4">
-        <nav style={{fontSize:13}}>
-          Home &gt; Product &gt;
-        </nav>
-        <h3 style={{fontSize:34,fontWeight:800,marginTop:6,color:'var(--brand-dark)'}}>Kue Panggang</h3>
-        <p className="text-muted">Koleksi kue panggang lembut dengan cita rasa klasik. Semua dipanggang segar dengan bahan pilihan terbaik.</p>
+      {/* Main */}
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        {/* Category */}
+        <motion.div
+          className="mt-6 flex flex-wrap justify-center gap-3 px-4"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true, amount: 0.2 }}
+        >
+          {categories.map((cat) => (
+            <motion.button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              whileHover={{ scale: 1.05 }}
+              className={`inline-flex flex-col items-center gap-2 px-2 py-3 min-w-[90px] rounded-lg transition-transform ${
+                activeCategory === cat.id
+                  ? "bg-[#f08b2d] text-white -translate-y-1.5 shadow-lg"
+                  : "bg-white text-slate-700 border border-slate-300 shadow-sm"
+              }`}
+            >
+              <motion.img src={cat.icon} alt={cat.label}
+                className="w-12 h-12 object-contain"
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+              />
+              <span className="text-sm font-medium">{cat.label}</span>
+            </motion.button>
+          ))}
+        </motion.div>
+
+        <div className="text-center mt-8 max-w-xl mx-auto leading-relaxed">
+          <nav className="text-sm text-slate-600 mb-3">
+            <Link to="/" className="hover:underline">Home</Link> &nbsp;&gt;&nbsp;
+            <Link to="/product" className="hover:underline">Product</Link> &nbsp;&gt;&nbsp;
+          </nav>
+          <motion.h3 className="text-3xl font-extrabold text-[#3d231d]"
+            initial={{ y: 30, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6 }} viewport={{ once: true }}
+          >
+            Koleksi {categories.find(c => c.id === activeCategory)?.label || "Produk"}
+          </motion.h3>
+          <motion.p className="text-sm text-slate-600 mt-3 mb-6"
+            initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }} viewport={{ once: true }}
+          >
+            {categoryDescriptions[activeCategory] || "Koleksi produk satuan Lola Cake dibuat segar dengan bahan pilihan terbaik."}
+          </motion.p>
+        </div>
 
         {/* Controls */}
-        <div className="controls-row">
-          <div style={{display:'flex',gap:12,alignItems:'center'}}>
-            <div>
-              <label className="mb-1 small">Rentang Harga</label>
-              <div className="d-flex gap-2 align-items-center">
-                <div style={{fontSize:13,color:'#555'}}>Rp {tempMin.toLocaleString()}</div>
-                <div className="slider-wrap">
-                  <input type="range" min={30000} max={500000} step={5000} value={tempMin} onChange={e => onTempMinChange(e.target.value)} />
-                  <input type="range" min={30000} max={500000} step={5000} value={tempMax} onChange={e => onTempMaxChange(e.target.value)} />
-                </div>
-                <div style={{fontSize:13,color:'#555'}}>Rp {tempMax.toLocaleString()}</div>
-                <button className="btn btn-outline-secondary btn-sm" onClick={applyFilters}>Terapkan Filter</button>
-              </div>
-            </div>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3" ref={priceRef}>
+            <div className="relative">
+              <button onClick={() => setOpenPrice(v => !v)}
+                className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm flex items-center gap-2 w-50"
+              >
+                Rentang Harga
+                <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none transition-transform ${openPrice ? "rotate-180" : ""}`}/>
+              </button>
 
-            <div>
-              <label className="mb-1 small">Cari</label>
-              <input className="form-control form-control-sm" placeholder="Cari produk..." value={query} onChange={e => setQuery(e.target.value)} />
+              {openPrice && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white shadow-lg rounded-lg p-4 z-20">
+                  <div className="flex justify-between text-sm text-slate-700 mb-2">
+                    <span className="text-slate-500">Rp3.000</span>
+                    <span className="text-slate-500">Rp500.000</span>
+                  </div>
+                  <input type="range" min={3000} max={500000} step={1000} value={tempMax}
+                    onChange={(e) => setTempMax(Number(e.target.value))} className="w-full accent-orange-400"
+                  />
+                  <div className="mt-2 text-sm text-slate-700">
+                    Rp{Number(tempMax).toLocaleString()}
+                  </div>
+                  <div className="flex justify-between gap-2 mt-4">
+                    <button onClick={() => { setTempMax(500000); setAppliedMax(500000); setOpenPrice(false); }} className="px-3 py-1 rounded border text-sm">
+                      Reset
+                    </button>
+                    <button onClick={applyFilters} className="px-3 py-1 rounded bg-[#f08b2d] text-white text-sm">
+                      Terapkan
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          <div style={{display:'flex',gap:12,alignItems:'center'}}>
-            <label className="small">Urutkan Berdasarkan</label>
-            <select className="form-select form-select-sm" value={appliedSort} onChange={e => setAppliedSort(e.target.value)}>
-              <option value="default">Default</option>
-              <option value="price-asc">Harga Terendah</option>
-              <option value="price-desc">Harga Tertinggi</option>
-              <option value="newest">Terbaru</option>
-              <option value="top">Terlaris</option>
-            </select>
+          <div className="relative w-50" ref={sortRef}>
+            <button onClick={() => setOpenSort(v => !v)} aria-expanded={openSort}
+              className="w-full text-left rounded-lg border border-slate-200 px-3 py-2 bg-white flex items-center justify-between text-sm"
+            >
+              {SORT_OPTIONS.find(o => o.value === appliedSort)?.label || "Urutkan Berdasarkan"}
+              <ChevronDown className={`w-4 h-4 transition-transform ${openSort ? "rotate-180" : ""}`} />
+            </button>
+
+            {openSort && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white shadow-lg rounded-lg z-20">
+                {SORT_OPTIONS.map(opt => (
+                  <button key={opt.value}
+                    onClick={() => {
+                      setAppliedSort(opt.value);
+                      setOpenSort(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-50 ${appliedSort === opt.value ? "font-semibold" : ""}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Product grid */}
-        <div className="row product-grid">
-          {filteredProducts.length === 0 && (
-            <div className="col-12 text-center py-5 text-muted">Tidak ada produk ditemukan.</div>
-          )}
-
-          {filteredProducts.map(p => {
-            const slug = `${slugify(p.title)}--${p.id}`; // pakai pola “slug--id” biar aman
-            return (
-              <div key={p.id} className="col-6 col-md-3 mb-4">
-                <div className="product-card text-center h-100 d-flex flex-column justify-content-between">
+        {/* Grid */}
+        <motion.div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+          initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}
+          variants={{
+            hidden: {},
+            visible: {
+              transition: { staggerChildren: 0.15 }
+            }
+          }}
+        >
+          {filteredProducts.length === 0 ? (
+            <motion.div className="col-span-full text-center py-12 text-slate-600"
+              initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.6 }}
+            >
+              Produk belum tersedia untuk saat ini.
+            </motion.div>
+          ) : (
+            filteredProducts.map((p) => {
+              const slug = `${slugify(p.nama || p.title)}`;
+              return (
+                <motion.div key={p.id} className="border border-slate-300 rounded-xl p-2 bg-white flex flex-col justify-between text-center shadow-md"
+                  initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+                >
                   <div>
-                    <img src={p.img} alt={p.title} className="product-image mx-auto" />
-                    <h6 style={{marginTop:12,fontWeight:700}}>{p.title}</h6>
-                    <div className="text-muted" style={{fontSize:13}}>Rp{p.price.toLocaleString()}</div>
+                    <img src={p.img} alt={p.nama || p.title}
+                      className="mx-auto rounded-md object-contain w-full h-40 bg-white"
+                    />
+                    <div className="mt-3 font-semibold">{p.nama || p.title}</div>
+                    <div className="text-sm text-slate-500">
+                      Rp {Number(p.price).toLocaleString()}
+                    </div>
                   </div>
 
-                  <div className="d-flex gap-2 mt-3">
-                    <button className="btn btn-outline-secondary btn-sm w-100">🛒</button>
-                    <Link to={`/product/satuan/${slug}`} className="btn"
-                          style={{background:'var(--brand-orange)',color:'#fff',borderRadius:8}}>
-                      Detail
-                    </Link>
+                  <div className="mt-4 flex gap-2 p-4 justify-center">
+                    <motion.button onClick={() => addToCart(p)}
+                      className="flex-0 border border-orange-400 rounded-md px-3 py-2 hover:bg-orange-50"
+                      title="Tambah ke keranjang" whileHover={{ scale: 1.1, rotate: -5 }} whileTap={{ scale: 0.95 }}
+                    >
+                      <ShoppingCart className="w-4 h-5 text-slate-700" />
+                    </motion.button>
+
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1">
+                      <Link to={`/product/satuan/${slug}`}
+                        className="block text-center rounded-md px-3 py-2 bg-[#f08b2d] text-white hover:brightness-105"
+                      >
+                        Detail
+                      </Link>
+                    </motion.div>
                   </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+                </motion.div>
+              );
+            })
+          )}
+        </motion.div>
+      </main>
     </div>
   );
 }

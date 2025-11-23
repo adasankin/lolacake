@@ -44,7 +44,7 @@ export default function PaymentWaiting() {
   };
 
   return (
-    <div className="container py-4">
+    <div className="max-w-6xl mx-auto px-4 py-4">
       <style>{`
         :root{--brand:#f08b2d;--dark:#3d231d}
         .step-pill{background:#f3e8d0;color:#3d231d;border-radius:28px;padding:12px 22px;font-weight:700}
@@ -66,9 +66,9 @@ export default function PaymentWaiting() {
 
       <h3 className="title text-center mb-4">Menunggu Pembayaran</h3>
 
-      <div className="row g-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Kiri: QR + instruksi */}
-        <div className="col-lg-7">
+        <div className="lg:col-span-7">
           <div className="panel">
             <div className="panel-b">
               <div className="d-flex justify-content-between align-items-center mb-2">
@@ -123,7 +123,7 @@ export default function PaymentWaiting() {
         </div>
 
         {/* Kanan: bantuan / kontak */}
-        <div className="col-lg-5">
+        <div className="lg:col-span-5">
           <div className="panel">
             <div className="panel-b">
               <div className="fw-semibold mb-2">Punya Pertanyaan Seputar Pesanan?</div>

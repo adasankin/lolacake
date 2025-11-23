@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import Popup from "../../components/Popup";
 import ToastBanner from "../../components/ToastBanner";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +12,7 @@ const saveUser = (u) => localStorage.setItem("user", JSON.stringify(u));
 
 export default function AccountPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const user = useMemo(() => readUser(), []);
   const [tab, setTab] = useState("akun"); // akun | orders | history | logout
 
@@ -157,6 +159,13 @@ export default function AccountPage() {
     if (!user) navigate("/login", { replace: true });
   }, [user, navigate]);
 
+  useEffect(() => {
+    const t = location.state?.tab;
+    if (t === "orders" || t === "history" || t === "akun" || t === "logout") {
+      setTab(t);
+    }
+  }, [location.state]);
+
   const showPopup = (p) => setPopup({ open: true, ...p });
   const closePopup = () => setPopup((s) => ({ ...s, open: false }));
 
@@ -296,7 +305,7 @@ export default function AccountPage() {
 
       <div className="row g-4">
         {/* Sidebar */}
-        <div className="col-lg-3">
+        <div className="col-12 col-lg-3">
           <div className="side">
             <a
               href="#"
@@ -342,12 +351,12 @@ export default function AccountPage() {
         </div>
 
         {/* Konten utama */}
-        <div className="col-lg-9">
+        <div className="col-12 col-lg-9">
           {/* TAB AKUN */}
           {tab === "akun" && (
             <>
               <div className="row g-3">
-                <div className="col-md-4">
+                <div className="col-12 col-md-4">
                   <div className="cardx p-3 d-flex align-items-center">
                     {profile.avatar ? (
                       <img
@@ -376,7 +385,7 @@ export default function AccountPage() {
                   </div>
                 </div>
 
-                <div className="col-md-8">
+                <div className="col-12 col-md-8">
                   <div className="cardx p-3">
                     <div className="mb-2 small text-muted">Full Name</div>
                     <input

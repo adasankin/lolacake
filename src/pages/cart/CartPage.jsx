@@ -94,7 +94,7 @@ export default function CartPage() {
   };
 
   return (
-    <div className="container py-4">
+    <div className="max-w-6xl mx-auto px-4 py-4">
       <style>{`
         :root{--brand:#f08b2d;--dark:#3d231d}
         .step-pill{background:#f3e8d0;color:#3d231d;border-radius:28px;padding:12px 22px;font-weight:700}
@@ -111,9 +111,9 @@ export default function CartPage() {
         <div className="step-pill" style={{ opacity: .5 }}>3. Payment</div>
       </div>
 
-      <div className="row g-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* LEFT: cart list */}
-        <div className="col-lg-8">
+        <div className="lg:col-span-8">
           <div className="d-flex justify-content-between align-items-center mb-2">
             <div className="form-check">
               <input
@@ -176,7 +176,7 @@ export default function CartPage() {
         </div>
 
         {/* RIGHT: summary */}
-        <div className="col-lg-4">
+        <div className="lg:col-span-4">
           <div className="card-cart p-3">
             <div className="fw-semibold mb-2">Ringkasan Belanja</div>
             <div className="d-flex justify-content-between">

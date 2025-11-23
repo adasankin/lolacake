@@ -30,7 +30,12 @@ export const api = {
 
 export function saveAuth({ token, user }) {
   localStorage.setItem("token", token);
-  localStorage.setItem("user", JSON.stringify(user));
+  if (user !== undefined && user !== null) {
+    localStorage.setItem("user", JSON.stringify(user));
+  } else {
+    localStorage.removeItem("user");
+  }
+  try { window.dispatchEvent(new Event("auth-changed")); } catch {}
 }
 export function getToken() {
   return localStorage.getItem("token");
